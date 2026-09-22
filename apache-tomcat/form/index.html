@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Rangers Samurai - Arachnid Dojo Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --samurai-red: #ea1d24;
+            --samurai-gold: #fbbf24;
+            --samurai-dark: #09090b;
+            --samurai-panel: rgba(14, 8, 8, 0.92);
+            --border-red: rgba(234, 29, 36, 0.5);
+            --web-color: rgba(255, 255, 255, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-image: url('https://images.unsplash.com/photo-1542224566-6e85f2e6772f?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: none; 
+        }
+
+        /* Cinematic Dark Background Tint */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(10, 3, 3, 0.92) 0%, rgba(25, 5, 5, 0.88) 100%);
+            z-index: -2;
+        }
+
+        /* --- SPIDER WEB (JAAL) CANVAS OVERLAY --- */
+        #spiderCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Ambient Samurai Red Aura */
+        .ambient-aura {
+            position: fixed;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(234, 29, 36, 0.2) 0%, rgba(251, 191, 36, 0.04) 50%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -3;
+            pointer-events: none;
+            animation: powerPulse 5s ease-in-out infinite alternate;
+        }
+
+        @keyframes powerPulse {
+            0% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.5; }
+            100% { transform: translate(-50%, -50%) scale(1.25); opacity: 1; }
+        }
+
+        /* Custom Samurai Cursor */
+        #samurai-cursor {
+            width: 48px;
+            height: 48px;
+            background-image: url('https://img.icons8.com/?size=100&id=63749&format=png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            filter: drop-shadow(0 0 12px var(--samurai-red));
+            transform: translate(-50%, -50%);
+            transition: transform 0.05s linear;
+        }
+
+        /* Trailing Sparks */
+        .samurai-spark {
+            position: fixed;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            background-image: url('https://img.icons8.com/?size=100&id=119012&format=png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            width: 32px;
+            height: 32px;
+            filter: drop-shadow(0 0 8px var(--samurai-gold));
+            z-index: 9999;
+            animation: sparkFade 0.4s ease-out backwards;
+        }
+
+        @keyframes sparkFade {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+        }
+
+        /* Form Card - Suspended in the Web */
+        .form-card {
+            background: var(--samurai-panel);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--border-red);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(234, 29, 36, 0.2);
+            width: 100%;
+            max-width: 450px;
+            z-index: 10;
+            position: absolute; /* Absolute positioning controlled via JS physics loop */
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--samurai-red), var(--samurai-gold), var(--samurai-red), transparent);
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 0 10px var(--samurai-red);
+        }
+
+        .form-header {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .form-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 10px rgba(234, 29, 36, 0.4);
+        }
+
+        .form-header p {
+            font-size: 12px;
+            color: #a1a1aa;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            margin-bottom: 6px;
+            color: var(--samurai-gold);
+            text-transform: uppercase;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(10, 5, 5, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            color: #f8fafc;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:hover, select:hover {
+            border-color: rgba(234, 29, 36, 0.5);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--samurai-red);
+            background: rgba(20, 8, 8, 0.9);
+            box-shadow: 0 0 0 4px rgba(234, 29, 36, 0.25);
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23fbbf24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+            cursor: pointer;
+        }
+
+        select option {
+            background-color: #180f0f;
+            color: #f8fafc;
+        }
+
+        .radio-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            background: rgba(10, 5, 5, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #f8fafc;
+            transition: all 0.25s ease;
+        }
+
+        .radio-option:hover {
+            border-color: var(--samurai-red);
+            background: rgba(30, 10, 10, 0.85);
+        }
+
+        .radio-option input {
+            accent-color: var(--samurai-red);
+            margin-right: 8px;
+            transform: scale(1.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, var(--samurai-red) 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 6px;
+            box-shadow: 0 4px 15px rgba(234, 29, 36, 0.4);
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #ef4444 0%, var(--samurai-red) 100%);
+            box-shadow: 0 6px 25px rgba(234, 29, 36, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(24, 15, 15, 0.95);
+            border-left: 4px solid var(--samurai-gold);
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 10001;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="spiderCanvas"></canvas>
+
+    <div class="ambient-aura"></div>
+
+    <div id="samurai-cursor"></div>
+
+    <div class="form-card" id="formCard">
+        <div class="form-header">
+            <h1>Samurai Academy</h1>
+            <p>Input Credentials for Symbol Power Registration</p>
+        </div>
+
+        <form id="samuraiForm" action="#" method="POST">
+            
+            <div class="input-group">
+                <label for="fullname">Samurai Recruit Name</label>
+                <input type="text" id="fullname" name="fullname" placeholder="e.g., Jayden Shiba" required>
+            </div>
+
+            <div class="input-group">
+                <label for="email">Spiritual Link Email</label>
+                <input type="email" id="email" name="email" placeholder="ranger@samurai.edu" required>
+            </div>
+
+            <div class="input-group">
+                <label for="symbolId">Symbol Power ID</label>
+                <input type="text" id="symbolId" name="symbolId" placeholder="SMP-2026-FIRE" required>
+            </div>
+
+            <div class="input-group">
+                <label>Element Affinity</label>
+                <div class="radio-container">
+                    <label class="radio-option">
+                        <input type="radio" name="element" value="fire" required> Fire (火)
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="element" value="water"> Water (水)
+                    </label>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="weapon">Folding Zord Weapon Focus</label>
+                <select id="weapon" name="weapon" required>
+                    <option value="">Select Weapon Disk</option>
+                    <option value="spin">Spin Sword (Red/Fire)</option>
+                    <option value="hydro">Hydro Bow (Blue/Water)</option>
+                    <option value="forest">Forest Spear (Green/Wood)</option>
+                    <option value="earth">Earth Slicer (Yellow/Earth)</option>
+                    <option value="heaven">Heaven Fan (Pink/Sky)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="submit-btn">Engage Symbol Power</button>
+
+        </form>
+    </div>
+
+    <div id="successToast" class="toast">SUCCESS: Symbol Power Initialized!</div>
+
+    <script>
+        const canvas = document.getElementById('spiderCanvas');
+        const ctx = canvas.getContext('2d');
+        const formCard = document.getElementById('formCard');
+
+        let width, height;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Mouse tracking for web tension
+        let mouse = { x: width / 2, y: height / 2, vx: 0, vy: 0 };
+        let prevMouse = { x: mouse.x, y: mouse.y };
+
+        window.addEventListener('mousemove', (e) => {
+            prevMouse.x = mouse.x;
+            prevMouse.y = mouse.y;
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+            mouse.vx = mouse.x - prevMouse.x;
+            mouse.vy = mouse.y - prevMouse.y;
+
+            if (Math.random() < 0.25) {
+                createSpark(e.clientX, e.clientY);
+            }
+        });
+
+        // Custom Cursor Engine
+        const cursor = document.getElementById('samurai-cursor');
+        let currentX = mouse.x;
+        let currentY = mouse.y;
+
+        function createSpark(x, y) {
+            const spark = document.createElement('div');
+            spark.className = 'samurai-spark';
+            spark.style.left = `${x}px`;
+            spark.style.top = `${y}px`;
+            document.body.appendChild(spark);
+            setTimeout(() => spark.remove(), 400);
+        }
+
+        // Floating Physics Engine Variables for Continuous Card Swaying
+        let time = 0;
+        let cardPosX = window.innerWidth / 2;
+        let cardPosY = window.innerHeight / 2;
+
+        function drawSpiderWeb() {
+            ctx.clearRect(0, 0, width, height);
+
+            const rect = formCard.getBoundingClientRect();
+            const anchorX = rect.left + rect.width / 2;
+            const anchorY = rect.top + rect.height / 2;
+
+            const rings = 9;
+            const rays = 14;
+            const maxRadius = Math.max(width, height) * 0.75;
+
+            // 1. Draw Suspension Threads Connecting Top Corners to Screen Roof
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 1.5;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(rect.left + 20, rect.top);
+            ctx.moveTo(width, 0);
+            ctx.lineTo(rect.right - 20, rect.top);
+            ctx.stroke();
+
+            // 2. Draw Radial Web Anchor Lines (Sutures)
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+            ctx.lineWidth = 1;
+
+            const rayAngles = [];
+            for (let i = 0; i < rays; i++) {
+                const angle = (i * 2 * Math.PI) / rays;
+                rayAngles.push(angle);
+
+                const outerX = anchorX + Math.cos(angle) * maxRadius;
+                const outerY = anchorY + Math.sin(angle) * maxRadius;
+
+                ctx.beginPath();
+                ctx.moveTo(anchorX, anchorY);
+                
+                const dx = mouse.x - anchorX;
+                const dy = mouse.y - anchorY;
+                const distToMouse = Math.sqrt(dx * dx + dy * dy);
+                let pullX = outerX;
+                let pullY = outerY;
+                
+                if (distToMouse < 400) {
+                    const factor = (400 - distToMouse) / 400 * 0.04;
+                    pullX += dx * factor;
+                    pullY += dy * factor;
+                }
+
+                ctx.lineTo(pullX, pullY);
+                ctx.stroke();
+            }
+
+            // 3. Draw Spiral Spacing Loops (The Jaal Webs)
+            ctx.strokeStyle = 'rgba(234, 29, 36, 0.16)';
+            ctx.lineWidth = 1.2;
+
+            for (let r = 1; r <= rings; r++) {
+                const radius = (r / rings) * (maxRadius * 0.85);
+                ctx.beginPath();
+
+                for (let i = 0; i <= rays; i++) {
+                    const angle = rayAngles[i % rays];
+                    let x = anchorX + Math.cos(angle) * radius;
+                    let y = anchorY + Math.sin(angle) * radius;
+
+                    const dx = mouse.x - x;
+                    const dy = mouse.y - y;
+                    const d = Math.sqrt(dx * dx + dy * dy);
+                    if (d < 180) {
+                        const pull = (180 - d) / 180 * 18;
+                        x += (dx / d) * pull;
+                        y += (dy / d) * pull;
+                    }
+
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+        }
+
+        // Continuous Physics Loop for Floating & Swaying Motion
+        function renderLoop() {
+            time += 0.035;
+
+            // Small continuous floating oscillations using sine waves
+            const targetX = (width / 2) + Math.sin(time * 0.8) * 12 + Math.cos(time * 0.4) * 6;
+            const targetY = (height / 2) + Math.cos(time * 1.1) * 10 + Math.sin(time * 0.5) * 5;
+
+            // Elastic smoothing (spring lag feel)
+            cardPosX += (targetX - cardPosX) * 0.1;
+            cardPosY += (targetY - cardPosY) * 0.1;
+
+            formCard.style.left = `${cardPosX}px`;
+            formCard.style.top = `${cardPosY}px`;
+
+            // Tilt effect based on movement velocity
+            const tiltX = (targetY - cardPosY) * 0.05;
+            const tiltY = (cardPosX - targetX) * 0.05;
+            formCard.style.transform = `translate(-50%, -50%) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+
+            // Smooth custom cursor movement
+            currentX += (mouse.x - currentX) * 0.25;
+            currentY += (mouse.y - currentY) * 0.25;
+            cursor.style.left = `${currentX}px`;
+            cursor.style.top = `${currentY}px`;
+
+            drawSpiderWeb();
+            requestAnimationFrame(renderLoop);
+        }
+        renderLoop();
+
+        // Form Submission Toast Trigger
+        const form = document.getElementById('samuraiForm');
+        const toast = document.getElementById('successToast');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        });
+    </script>
+</body>
+</html>
