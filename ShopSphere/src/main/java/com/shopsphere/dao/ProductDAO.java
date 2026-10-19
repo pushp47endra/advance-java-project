@@ -1,0 +1,12 @@
+package com.shopsphere.dao;
+import com.shopsphere.model.Product;import com.shopsphere.util.DB;import java.sql.*;import java.util.*;
+public class ProductDAO {
+ public static Product map(ResultSet r)throws SQLException {Product p=new Product();p.setProductId(r.getInt("product_id"));p.setCategoryId(r.getInt("category_id"));p.setName(r.getString("name"));p.setBrand(r.getString("brand"));p.setDescription(r.getString("description"));p.setPrice(r.getBigDecimal("price"));p.setDiscount(r.getBigDecimal("discount"));p.setStock(r.getInt("stock"));p.setImageUrl(r.getString("image_url"));p.setStatus(r.getBoolean("status"));return p;}
+ public List<Product> list(String search)throws SQLException {List<Product> out=new ArrayList<>();try(Connection c=DB.connect();PreparedStatement s=c.prepareStatement("SELECT * FROM products WHERE status=TRUE AND (name LIKE ? OR brand LIKE ?) ORDER BY product_id DESC")){String q="%"+(search==null?"":search)+"%";s.setString(1,q);s.setString(2,q);try(ResultSet r=s.executeQuery()){while(r.next())out.add(map(r));}}return out;}
+ public Product find(int id)throws SQLException {try(Connection c=DB.connect();PreparedStatement s=c.prepareStatement("SELECT * FROM products WHERE product_id=? AND status=TRUE")){s.setInt(1,id);try(ResultSet r=s.executeQuery()){return r.next()?map(r):null;}}}
+ public List<Product> all()throws SQLException {List<Product> a=new ArrayList<>();try(Connection c=DB.connect();PreparedStatement s=c.prepareStatement("SELECT * FROM products ORDER BY product_id DESC");ResultSet r=s.executeQuery()){while(r.next())a.add(map(r));}return a;}
+ public void save(int id,String name,String brand,int category,String desc,java.math.BigDecimal price,int stock,String image)throws SQLException {
+  boolean update=id>0;String sql=update?"UPDATE products SET name=?,brand=?,category_id=?,description=?,price=?,stock=?,image_url=? WHERE product_id=?":"INSERT INTO products(name,brand,category_id,description,price,stock,image_url,discount) VALUES(?,?,?,?,?,?,?,0)";
+  try(Connection c=DB.connect();PreparedStatement s=c.prepareStatement(sql)){s.setString(1,name);s.setString(2,brand);s.setInt(3,category);s.setString(4,desc);s.setBigDecimal(5,price);s.setInt(6,stock);s.setString(7,image);if(update)s.setInt(8,id);s.executeUpdate();}}
+ public void hide(int id)throws SQLException {try(Connection c=DB.connect();PreparedStatement s=c.prepareStatement("UPDATE products SET status=FALSE WHERE product_id=?")){s.setInt(1,id);s.executeUpdate();}}
+}
